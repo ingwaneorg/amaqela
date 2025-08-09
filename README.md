@@ -1,0 +1,2 @@
+# amaqela
+Group Allocation Algorithm
