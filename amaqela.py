@@ -109,7 +109,7 @@ class BreakoutAllocator:
                 # Count how many times this pair has appeared before
                 score += len(self.pair_sessions[sorted_pair])
         return score
-    
+
     def update_pair_tracking(self, groups, session_num):
         """Update tracking of which pairs appear in which sessions"""
         for group in groups:
@@ -145,7 +145,7 @@ class BreakoutAllocator:
                 shuffled = self.learners.copy()
                 random.shuffle(shuffled)
                 best_grouping = self.create_valid_grouping(shuffled)
-            
+
             # Use the best grouping for this session
             self.session_groups.append(best_grouping)
             self.update_pair_tracking(best_grouping, session + 1)
