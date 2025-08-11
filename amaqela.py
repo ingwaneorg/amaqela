@@ -31,7 +31,7 @@ def load_learner_dict_from_csv(filename):
 def get_names_from_codes(code_list, learner_map):
     return [learner_map.get(code, f"Unknown({code})") for code in code_list]
 
-def get_group_sizes(class_size):
+def get_group_sizes(class_size, config=None):
     """Return the optimal group sizes for a given class size"""
     group_configs = {
          6: [3, 3],
@@ -40,28 +40,35 @@ def get_group_sizes(class_size):
          9: [3, 3, 3],
         10: [3, 3, 4],
         11: [3, 4, 4],
-        12: [4, 4, 4],  # [3, 3, 3, 3], 
+        12: [4, 4, 4],
         13: [3, 3, 3, 4],
         14: [3, 3, 4, 4],
-        15: [3, 4, 4, 4],  # or [3, 3, 3, 3, 3],
+        15: [3, 4, 4, 4],
         16: [4, 4, 4, 4],
         17: [3, 3, 3, 4, 4],
-        18: [3, 3, 4, 4, 4],  # or [3, 3, 3, 3, 3, 3] 
+        18: [3, 3, 4, 4, 4],
     }
+    if config == 3:
+        # override the 12, 15, and 18 entries
+        group_configs[12] = [3, 3, 3, 3]
+        group_configs[15] = [3, 3, 3, 3, 3]
+        group_configs[18] = [3, 3, 3, 3, 3, 3]
+
     return group_configs[class_size]    
     
 class BreakoutAllocator:
-    def __init__(self, class_size, sessions, learner_dict):
+    def __init__(self, class_size, sessions, learner_dict, config=None):
         self.class_size = class_size
         self.sessions = sessions
         self.learners = [f"L{i+1}" for i in range(class_size)]
         self.session_groups = []
         self.pair_sessions = defaultdict(list)  # Track which sessions each pair appears in
         self.learner_dict = learner_dict  # store name the mappings
+        self.config = config  # Store the config
 
     def create_valid_grouping(self, learner_list):
         groups = []
-        group_sizes = get_group_sizes(len(learner_list))
+        group_sizes = get_group_sizes(len(learner_list), self.config)  # Pass the stored config
         
         start = 0
         for size in group_sizes:
@@ -75,7 +82,7 @@ class BreakoutAllocator:
         groupings = []
         
         # Try multiple random arrangements and pick the best
-        for _ in range(1000):
+        for _ in range(5000):
             shuffled = self.learners.copy()
             random.shuffle(shuffled)
             
@@ -234,14 +241,13 @@ class BreakoutAllocator:
         click.echo(f"\nAverage meetings per person: {meetings_per_person:.1f}")
 
 @click.command()
-@click.option('--class-size', required=True, type=click.IntRange(6, 18), 
-              help='Number of learners in the class (6-18)')
-@click.option('--sessions', default=8, type=click.IntRange(1, 20), 
-              help='Number of sessions to plan (default: 8)')
-@click.option('--learner-csv', default='data/groups.csv', type=click.Path(),
-              help='Path to CSV file with learner names (default: data/groups.csv)')
-@click.version_option(version='2.0.0')
-def main(class_size, sessions, learner_csv):
+@click.option('--class-size', required=True, type=click.IntRange(6, 18), help='Number of learners in the class (6-18)')
+@click.option('--sessions', default=8, type=click.IntRange(1, 20), help='Number of sessions to plan (default: 8)')
+@click.option('--learner-csv', default='data/groups.csv', type=click.Path(), help='Path to CSV file with learner names (default: data/groups.csv)')
+@click.option('--config', type=int, default=4, show_default=True, help='Ideal group size. Default is 4 but could be 3.'
+)
+@click.version_option(version='2.1.0')
+def main(class_size, sessions, learner_csv, config):
     """
     Breakout Room Allocator for Apprenticeship Classes
     
@@ -249,11 +255,8 @@ def main(class_size, sessions, learner_csv):
     Creates groups of 3-4 learners with detailed allocation statistics.
     
     Examples:
-    
         python groups.py --class-size 12
-        
         python groups.py --class-size 15 --sessions 6
-        
         python groups.py --class-size 10 --learner-csv my-class.csv
     """
     click.echo("Breakout Room Allocator for Apprenticeship Classes")
@@ -274,7 +277,7 @@ def main(class_size, sessions, learner_csv):
     click.echo(f"Sessions: {sessions}")
     
     # Create allocator and run
-    allocator = BreakoutAllocator(class_size, sessions, learner_dict)
+    allocator = BreakoutAllocator(class_size, sessions, learner_dict, config)
     allocator.allocate_sessions()
     
     # Print results
