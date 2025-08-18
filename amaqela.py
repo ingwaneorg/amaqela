@@ -52,6 +52,7 @@ def get_group_sizes(class_size, config=None):
         # override the 12, 15, and 18 entries
         group_configs[12] = [3, 3, 3, 3]
         group_configs[15] = [3, 3, 3, 3, 3]
+        group_configs[16] = [3, 3, 3, 3, 4]
         group_configs[18] = [3, 3, 3, 3, 3, 3]
 
     return group_configs[class_size]    
