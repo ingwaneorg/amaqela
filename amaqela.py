@@ -40,20 +40,20 @@ def get_group_sizes(class_size, config=None):
          9: [3, 3, 3],
         10: [3, 3, 4],
         11: [3, 4, 4],
-        12: [4, 4, 4],
+        12: [3, 3, 3, 3],
         13: [3, 3, 3, 4],
         14: [3, 3, 4, 4],
-        15: [3, 4, 4, 4],
-        16: [4, 4, 4, 4],
+        15: [3, 3, 3, 3, 3],
+        16: [3, 3, 3, 3, 4],
         17: [3, 3, 3, 4, 4],
-        18: [3, 3, 4, 4, 4],
+        18: [3, 3, 3, 3, 3, 3],
     }
-    if config == 3:
-        # override the 12, 15, and 18 entries
-        group_configs[12] = [3, 3, 3, 3]
-        group_configs[15] = [3, 3, 3, 3, 3]
-        group_configs[16] = [3, 3, 3, 3, 4]
-        group_configs[18] = [3, 3, 3, 3, 3, 3]
+    if config == 4:
+        # override the 12, 15, 16, & 18 entries
+        group_configs[12] = [4, 4, 4]
+        group_configs[15] = [3, 4, 4, 4]
+        group_configs[16] = [4, 4, 4, 4]
+        group_configs[18] = [3, 3, 4, 4, 4]
 
     return group_configs[class_size]    
     
@@ -244,29 +244,27 @@ class BreakoutAllocator:
 @click.command()
 @click.option('--class-size', required=True, type=click.IntRange(6, 18), help='Number of learners in the class (6-18)')
 @click.option('--sessions', default=8, type=click.IntRange(1, 20), help='Number of sessions to plan (default: 8)')
-@click.option('--learner-csv', default='data/groups.csv', type=click.Path(), help='Path to CSV file with learner names (default: data/groups.csv)')
-@click.option('--config', type=int, default=4, show_default=True, help='Ideal group size. Default is 4 but could be 3.'
-)
-@click.version_option(version='2.1.0')
-def main(class_size, sessions, learner_csv, config):
+@click.option('--learner-names', '--names', default='~/data/groups.csv', type=click.Path(), help='Path to CSV file with learner names (default: ~/data/groups.csv)')
+@click.option('--config', type=int, default=3, show_default=True, help='Ideal group size. Default is 3 but could be 4.')
+@click.version_option(version='2.3.0')
+def main(class_size, sessions, learner_names, config):
     """
-    Breakout Room Allocator for Apprenticeship Classes
+    Amaqela ~ Breakout Room Allocator
     
     Optimises group mixing across sessions to minimise repeated pairings.
     Creates groups of 3-4 learners with detailed allocation statistics.
     
     Examples:
-        python groups.py --class-size 12
-        python groups.py --class-size 15 --sessions 6
-        python groups.py --class-size 10 --learner-csv my-class.csv
+        amaqela --class-size 12
+        amaqela --class-size 15 --sessions 6
+        amaqela --class-size 10 --learner-names ~/data/my-class.csv
     """
     click.echo("Breakout Room Allocator for Apprenticeship Classes")
     click.echo("=" * 50)
     
     # Check if CSV file exists and show appropriate message
-    if learner_csv != 'data/groups.csv' and not Path(learner_csv).exists():
-        click.echo(f"Warning: CSV file '{learner_csv}' not found. Using default learner codes.")
-    elif learner_csv == 'data/groups.csv' and not Path(learner_csv).exists():
+    learner_csv = Path(learner_names).expanduser()
+    if not Path(learner_csv).exists():
         click.echo(f"CSV file not found. Using default learner codes (L1, L2, etc.)")
     else:
         click.echo(f"Loading learner names from: {learner_csv}")
