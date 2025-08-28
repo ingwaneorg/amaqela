@@ -8,6 +8,7 @@ import os
 import csv
 import itertools
 import random
+import string
 import click
 from collections import defaultdict, Counter
 from pathlib import Path
@@ -166,7 +167,8 @@ class BreakoutAllocator:
             named_groups = self.translate_group_codes_to_names(groups)
             for group_idx, group in enumerate(groups):
                 learner_names = sorted([self.learner_dict.get(code, code) for code in group])
-                click.echo(f"  Group {group_idx + 1}: {', '.join(learner_names)}")
+                group_label = string.ascii_uppercase[group_idx]  # A, B, C, ...
+                click.echo(f"  Group {group_label}: {', '.join(learner_names)}")
     
     def print_pair_matrix(self):
         """Print a matrix showing which sessions each pair worked together"""
@@ -259,7 +261,7 @@ def main(class_size, sessions, learner_names, config):
         amaqela --class-size 15 --sessions 6
         amaqela --class-size 10 --learner-names ~/data/my-class.csv
     """
-    click.echo("Breakout Room Allocator for Apprenticeship Classes")
+    click.echo(f"\nBreakout Room Allocator for Apprenticeship Classes")
     click.echo("=" * 50)
     
     # Check if CSV file exists and show appropriate message
