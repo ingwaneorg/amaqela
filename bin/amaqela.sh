@@ -3,9 +3,9 @@ SSD="/mnt/ssd"
 PROJECT="amaqela"
 
 # Change directory
-directory="${SSD}/GitHub/${PROJECT}"
+directory="${SSD}/projects/ingwaneorg/${PROJECT}"
 if [ ! -d ${directory} ]; then
-  echo "ERROR: Directory not found - ${directory}"
+  echo "$0 ERROR: Directory not found - ${directory}"
   exit 1
 fi
 cd ${directory}
@@ -13,7 +13,7 @@ cd ${directory}
 # Activate virtual enviroment
 filename="venv/bin/activate"
 if [ ! -f ${filename} ]; then
-  echo "ERROR: File not found - ${filename}"
+  echo "$0 ERROR: File not found - ${filename}"
   exit 2
 fi
 source ${filename}
@@ -21,7 +21,7 @@ source ${filename}
 # Run the program
 filename="${PROJECT}.py"
 if [ ! -f ${filename} ]; then
-  echo "ERROR: File not found - ${filename}"
+  echo "$0 ERROR: File not found - ${filename}"
   exit 3
 fi
 python ${filename} "$@"
